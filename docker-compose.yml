@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: l2sec-postgres
+    environment:
+      POSTGRES_USER: l2sec
+      POSTGRES_PASSWORD: l2sec
+      POSTGRES_DB: l2sec
+    ports:
+      - "5432:5432"
+    volumes:
+      - l2sec_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U l2sec -d l2sec"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+    container_name: l2sec-api
+    environment:
+      APP_NAME: l2sec-api
+      APP_ENV: local
+      DATABASE_URL: postgresql+psycopg2://l2sec:l2sec@postgres:5432/l2sec
+      API_V1_PREFIX: /v1
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend/app:/app/app
+
+volumes:
+  l2sec_postgres_data:
