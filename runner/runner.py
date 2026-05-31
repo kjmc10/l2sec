@@ -10,160 +10,84 @@ from config import (
     RUNNER_TOKEN,
 )
 
+from zap_executor import run_zap_baseline
 
-def get_headers():
-    return {
-        "Authorization": f"Bearer {RUNNER_TOKEN}",
-    }
+
+def headers():
+    return {"Authorization": f"Bearer {RUNNER_TOKEN}"}
 
 
 def send_heartbeat():
-    url = f"{CONTROL_PLANE_URL}/v1/runners/heartbeat"
-
-    try:
-        response = requests.post(
-            url,
-            headers=get_headers(),
-            timeout=10,
-        )
-
-        print(
-            "heartbeat",
-            response.status_code,
-            response.text,
-        )
-
-    except requests.RequestException as exc:
-        print(
-            "heartbeat_error",
-            str(exc),
-        )
+    requests.post(f"{CONTROL_PLANE_URL}/v1/runners/heartbeat", headers=headers())
 
 
 def get_next_job():
-    url = f"{CONTROL_PLANE_URL}/v1/runner/jobs/next"
+    r = requests.get(
+        f"{CONTROL_PLANE_URL}/v1/runner/jobs/next",
+        headers=headers(),
+    )
 
-    try:
-        response = requests.get(
-            url,
-            headers=get_headers(),
-            timeout=10,
-        )
-
-        if response.status_code != 200:
-            print(
-                "get_next_job_error",
-                response.status_code,
-                response.text,
-            )
-            return None
-
-        if not response.text or response.text == "null":
-            return None
-
-        return response.json()
-
-    except requests.RequestException as exc:
-        print(
-            "get_next_job_exception",
-            str(exc),
-        )
+    if r.status_code != 200 or r.text == "null":
         return None
 
-
-def update_job_status(scan_job_id, status, message=None):
-    url = f"{CONTROL_PLANE_URL}/v1/runner/jobs/{scan_job_id}/status"
-
-    payload = {
-        "status": status,
-        "message": message,
-    }
-
-    try:
-        response = requests.post(
-            url,
-            headers=get_headers(),
-            json=payload,
-            timeout=10,
-        )
-
-        print(
-            "update_job_status",
-            status,
-            response.status_code,
-            response.text,
-        )
-
-        return response.status_code == 200
-
-    except requests.RequestException as exc:
-        print(
-            "update_job_status_exception",
-            str(exc),
-        )
-        return False
+    return r.json()
 
 
-def validate_allowed_host(target_url, allowed_host):
-    parsed_url = urlparse(target_url)
+def update_status(job_id, status):
+    requests.post(
+        f"{CONTROL_PLANE_URL}/v1/runner/jobs/{job_id}/status",
+        headers=headers(),
+        json={"status": status},
+    )
 
-    if not parsed_url.hostname:
-        return False
 
-    return parsed_url.hostname == allowed_host
+def send_results(job_id, findings):
+    requests.post(
+        f"{CONTROL_PLANE_URL}/v1/runner/jobs/{job_id}/results",
+        headers=headers(),
+        json={"findings": findings},   # ✅ IMPORTANTE
+    )
+
+
+def validate_host(url, allowed_host):
+    return urlparse(url).hostname == allowed_host
 
 
 def process_job(job):
-    scan_job_id = job["id"]
+    job_id = job["id"]
     target = job["target"]
 
-    target_url = target["url"]
+    url = target["url"]
     allowed_host = target["allowed_host"]
-    scan_type = job["scan_type"]
 
-    print(f"picked_job id={scan_job_id} scan_type={scan_type} target={target_url}")
-
-    if not validate_allowed_host(
-        target_url=target_url,
-        allowed_host=allowed_host,
-    ):
-        update_job_status(
-            scan_job_id=scan_job_id,
-            status="failed",
-            message="Target URL hostname does not match allowed_host.",
-        )
+    if not validate_host(url, allowed_host):
+        update_status(job_id, "failed")
         return
 
-    update_job_status(
-        scan_job_id=scan_job_id,
-        status="running",
-        message="Runner started simulated scan.",
-    )
+    update_status(job_id, "running")
 
-    print(f"simulating_scan target={target_url}")
+    findings = run_zap_baseline(url)
 
-    time.sleep(5)
+    send_results(job_id, findings)
 
-    update_job_status(
-        scan_job_id=scan_job_id,
-        status="completed",
-        message="Simulated scan completed successfully.",
-    )
+    update_status(job_id, "completed")
 
 
 def main():
-    print(f"Starting runner: {RUNNER_NAME}")
-    print(f"Control plane URL: {CONTROL_PLANE_URL}")
+    print(f"Runner started: {RUNNER_NAME}")
 
     while True:
-        send_heartbeat()
+        try:
+            send_heartbeat()
+            job = get_next_job()
 
-        job = get_next_job()
+            if job:
+                process_job(job)
+            else:
+                print("no jobs")
 
-        if job:
-            process_job(job)
-        else:
-            print("no_pending_jobs")
+        except Exception as e:
+            print("error:", e)
 
         time.sleep(HEARTBEAT_INTERVAL_SECONDS)
 
