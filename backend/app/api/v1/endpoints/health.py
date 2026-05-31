@@ -10,6 +10,6 @@ router = APIRouter()
 def health_check():
     return {
         "status": "ok",
-        "service": "l2sec api",
-        "environment":"local"
+        "service": settings.app_name,
+        "environment": settings.app_env,
     }

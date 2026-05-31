@@ -31,7 +31,7 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - ./backend/app:/app/app
+      - ./backend:/app
 
 volumes:
   l2sec_postgres_data:
