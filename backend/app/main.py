@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from app.api.v1.router import api_router
 from app.core.config import settings
+from fastapi.middleware.cors import CORSMiddleware
 
 
 logging.basicConfig(level=logging.INFO)
@@ -15,6 +16,21 @@ app = FastAPI(
     title="L2Sec API",
     description="Local-first PTaaS/DAST control plane API",
     version="0.1.0",
+)
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:4200",
+        "http://localhost:4201",
+        "http://localhost:4202",
+        "http://localhost:4203",
+        "http://localhost:4204",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 

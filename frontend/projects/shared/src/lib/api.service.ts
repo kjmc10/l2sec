@@ -1,0 +1,100 @@
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+
+export interface Finding {
+  id: string;
+  scan_job_id: string;
+  target_id: string;
+  name: string;
+  severity: string;
+  confidence?: string | null;
+  url?: string | null;
+  method?: string | null;
+  cwe?: string | null;
+  owasp_category?: string | null;
+  evidence?: string | null;
+  remediation?: string | null;
+  status: string;
+  created_at: string;
+}
+
+export interface FindingsSummary {
+  high: number;
+  medium: number;
+  low: number;
+  info: number;
+  total: number;
+}
+
+export interface ScanJob {
+  id: string;
+  target_id: string;
+  runner_id?: string | null;
+  scan_type: string;
+  status: string;
+  upload_mode: string;
+  created_at: string;
+  started_at?: string | null;
+  finished_at?: string | null;
+}
+
+export interface Target {
+  id: string;
+  name: string;
+  url: string;
+  environment: string;
+  allowed_host: string;
+  created_at: string;
+}
+
+export interface TargetCreatePayload {
+  name: string;
+  url: string;
+  environment: string;
+}
+
+@Injectable({
+  providedIn: 'root',
+})
+export class ApiService {
+  private readonly baseUrl = 'http://localhost:8000/v1';
+
+  constructor(private readonly http: HttpClient) {}
+
+  getFindings(severity?: string) {
+    let params = new HttpParams();
+
+    if (severity) {
+      params = params.set('severity', severity);
+    }
+
+    return this.http.get<Finding[]>(`${this.baseUrl}/findings`, {
+      params,
+    });
+  }
+
+  getFindingsSummary() {
+    return this.http.get<FindingsSummary>(`${this.baseUrl}/findings/summary`);
+  }
+
+  getScanJobs() {
+    return this.http.get<ScanJob[]>(`${this.baseUrl}/scan-jobs`);
+  }
+
+  createScanJob(targetId: string) {
+    return this.http.post<ScanJob>(`${this.baseUrl}/scan-jobs`, {
+      target_id: targetId,
+      scan_type: 'baseline',
+      upload_mode: 'sanitized',
+    });
+  }
+
+  getTargets() {
+    return this.http.get<Target[]>(`${this.baseUrl}/targets`);
+  }
+
+  createTarget(payload: TargetCreatePayload) {
+      return this.http.post<Target>(`${this.baseUrl}/targets`, payload);
+  }
+
+}

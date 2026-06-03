@@ -1,0 +1,115 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h2>Targets</h2>
+      <p>Registra aplicaciones y APIs para escanearlas con el runner local.</p>
+    </div>
+
+    <button type="button" (click)="loadTargets()">
+      Refresh
+    </button>
+  </header>
+
+  <section class="create-card">
+    <div class="create-header">
+      <h3>Register Target</h3>
+      <p>Define una URL permitida para escaneo local-first.</p>
+    </div>
+
+    <div class="form-grid">
+      <label>
+        Name
+        <input
+          type="text"
+          [(ngModel)]="form.name"
+          placeholder="API Staging"
+        />
+      </label>
+
+      <label>
+        URL
+        <input
+          type="url"
+          [(ngModel)]="form.url"
+          placeholder="https://staging.example.com"
+        />
+      </label>
+
+      <label>
+        Environment
+        <select [(ngModel)]="form.environment">
+          <option value="dev">dev</option>
+          <option value="qa">qa</option>
+          <option value="staging">staging</option>
+          <option value="production">production</option>
+        </select>
+      </label>
+
+      <button
+        type="button"
+        class="create-button"
+        (click)="createTarget()"
+        [disabled]="creating"
+      >
+        {{ creating ? 'Creating...' : 'Create Target' }}
+      </button>
+    </div>
+  </section>
+
+  <div *ngIf="loading" class="state">
+    Cargando targets...
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="success" class="success">
+    {{ success }}
+  </div>
+
+  <section class="targets-grid" *ngIf="!loading">
+    <article class="target-card" *ngFor="let target of targets">
+      <div class="target-top">
+        <div>
+          <h3>{{ target.name }}</h3>
+          <p>{{ target.url }}</p>
+        </div>
+
+        <span [class]="getEnvironmentClass(target.environment)">
+          {{ target.environment }}
+        </span>
+      </div>
+
+      <div class="target-meta">
+        <div>
+          <span>Allowed Host</span>
+          <strong>{{ target.allowed_host }}</strong>
+        </div>
+
+        <div>
+          <span>Created</span>
+          <strong>{{ target.created_at }}</strong>
+        </div>
+      </div>
+
+      <div class="target-actions">
+        <button
+          type="button"
+          (click)="runScan(target)"
+          [disabled]="runningTargetId === target.id"
+        >
+          {{ runningTargetId === target.id ? 'Creating Job...' : 'Run Baseline Scan' }}
+        </button>
+
+        <a [routerLink]="['/findings']">
+          View Findings
+        </a>
+      </div>
+    </article>
+
+    <div class="empty" *ngIf="targets.length === 0">
+      No hay targets registrados todavía.
+    </div>
+  </section>
+</section>

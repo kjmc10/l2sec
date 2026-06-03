@@ -1,0 +1,81 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.page-header h2 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.page-header p {
+  margin: 6px 0 0;
+  color: #64748b;
+}
+
+button {
+  border: 0;
+  background: #2563eb;
+  color: #ffffff;
+  padding: 10px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.card span {
+  display: block;
+  color: #64748b;
+  margin-bottom: 12px;
+}
+
+.card strong {
+  font-size: 34px;
+}
+
+.high strong {
+  color: #dc2626;
+}
+
+.medium strong {
+  color: #d97706;
+}
+
+.low strong {
+  color: #2563eb;
+}
+
+.info strong {
+  color: #64748b;
+}
+
+.total strong {
+  color: #111827;
+}
+
+.state {
+  color: #64748b;
+}
+
+.error {
+  color: #dc2626;
+}

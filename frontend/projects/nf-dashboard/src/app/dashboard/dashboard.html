@@ -1,0 +1,40 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h2>Security Dashboard</h2>
+      <p>Resumen de riesgos detectados por el runner local y OWASP ZAP.</p>
+    </div>
+
+    <button type="button" (click)="loadSummary()">Refresh</button>
+  </header>
+
+  <div *ngIf="loading" class="state">Cargando resumen...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <div *ngIf="summary" class="cards">
+    <article class="card high">
+      <span>High</span>
+      <strong>{{ summary.high }}</strong>
+    </article>
+
+    <article class="card medium">
+      <span>Medium</span>
+      <strong>{{ summary.medium }}</strong>
+    </article>
+
+    <article class="card low">
+      <span>Low</span>
+      <strong>{{ summary.low }}</strong>
+    </article>
+
+    <article class="card info">
+      <span>Info</span>
+      <strong>{{ summary.info }}</strong>
+    </article>
+
+    <article class="card total">
+      <span>Total</span>
+      <strong>{{ summary.total }}</strong>
+    </article>
+  </div>
+</section>
