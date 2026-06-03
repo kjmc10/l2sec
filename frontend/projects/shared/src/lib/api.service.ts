@@ -77,6 +77,14 @@ export class ApiService {
     return this.http.get<FindingsSummary>(`${this.baseUrl}/findings/summary`);
   }
 
+
+  updateFindingStatus(id: string, status: string) {
+    return this.http.patch<Finding>(
+      `${this.baseUrl}/findings/${id}/status`,
+      { status }
+    );
+  }
+
   getScanJobs() {
     return this.http.get<ScanJob[]>(`${this.baseUrl}/scan-jobs`);
   }

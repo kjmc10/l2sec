@@ -1,59 +1,95 @@
 <section class="page">
-  <header class="page-header">
-    <div>
-      <h2>Findings</h2>
-      <p>Hallazgos detectados por OWASP ZAP y almacenados en el control plane.</p>
-    </div>
 
-    <div class="filters">
-      <select [(ngModel)]="severity">
-        <option value="">All</option>
-        <option value="high">High</option>
-        <option value="medium">Medium</option>
-        <option value="low">Low</option>
-        <option value="info">Info</option>
-      </select>
-
-      <button type="button" (click)="loadFindings()">Filter</button>
-    </div>
+  <header class="header">
+    <h2>Findings</h2>
   </header>
 
-  <div *ngIf="loading" class="state">Cargando findings...</div>
-  <div *ngIf="error" class="error">{{ error }}</div>
+  <!-- filtros -->
+  <div class="filters">
+    <input
+      type="text"
+      placeholder="Search..."
+      [(ngModel)]="search"
+      (input)="applyFilters()"
+    />
 
-  <div class="table-wrapper" *ngIf="!loading">
-    <table>
-      <thead>
-        <tr>
-          <th>Severity</th>
-          <th>Name</th>
-          <th>URL</th>
-          <th>Method</th>
-          <th>CWE</th>
-          <th>Status</th>
-        </tr>
-      </thead>
+    <select [(ngModel)]="severityFilter" (change)="applyFilters()">
+      <option value="">All Severity</option>
+      <option value="high">High</option>
+      <option value="medium">Medium</option>
+      <option value="low">Low</option>
+      <option value="info">Info</option>
+    </select>
 
-      <tbody>
-        <tr *ngFor="let finding of findings">
-          <td>
-            <span [class]="getSeverityClass(finding.severity)">
-              {{ finding.severity }}
-            </span>
-          </td>
-          <td>{{ finding.name }}</td>
-          <td class="url">{{ finding.url }}</td>
-          <td>{{ finding.method || '-' }}</td>
-          <td>{{ finding.cwe || '-' }}</td>
-          <td>{{ finding.status }}</td>
-        </tr>
-
-        <tr *ngIf="findings.length === 0">
-          <td colspan="6" class="empty">
-            No hay findings para mostrar.
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+      <option value="">All Status</option>
+      <option value="open">Open</option>
+      <option value="false_positive">False Positive</option>
+      <option value="accepted_risk">Accepted Risk</option>
+      <option value="fixed">Fixed</option>
+    </select>
   </div>
+
+  <!-- tabla -->
+  <div *ngIf="loading">Loading...</div>
+
+  <table *ngIf="!loading">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Severity</th>
+        <th>Status</th>
+        <th>URL</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let f of filtered" (click)="openDetail(f)">
+        <td>{{ f.name }}</td>
+        <td>{{ f.severity }}</td>
+        <td>{{ f.status }}</td>
+        <td>{{ f.url }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- drawer -->
+  <div class="drawer" *ngIf="selected">
+    <div class="drawer-content">
+
+      <button class="close" (click)="closeDetail()">✕</button>
+
+      <h3>{{ selected.name }}</h3>
+
+      <p><strong>Severity:</strong> {{ selected.severity }}</p>
+      <p><strong>Status:</strong> {{ selected.status }}</p>
+      <p><strong>URL:</strong> {{ selected.url }}</p>
+      <p><strong>Method:</strong> {{ selected.method }}</p>
+      <p><strong>CWE:</strong> {{ selected.cwe }}</p>
+
+      <div class="evidence">
+        <h4>Evidence</h4>
+        <pre>{{ selected.evidence }}</pre>
+      </div>
+
+      <div class="remediation">
+        <h4>Remediation</h4>
+        <p>{{ selected.remediation }}</p>
+      </div>
+
+      <div class="actions">
+        <button (click)="updateStatus('false_positive')" [disabled]="updating">
+          False Positive
+        </button>
+
+        <button (click)="updateStatus('accepted_risk')" [disabled]="updating">
+          Accept Risk
+        </button>
+
+        <button (click)="updateStatus('fixed')" [disabled]="updating">
+          Mark Fixed
+        </button>
+      </div>
+    </div>
+  </div>
+
 </section>
