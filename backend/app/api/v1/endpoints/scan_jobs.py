@@ -1,12 +1,13 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.runner import Runner
 from app.models.scan_job import ScanJob
 from app.models.target import Target
+from app.models.finding import Finding
 from app.schemas.scan_job import ScanJobCreate, ScanJobResponse
 
 
@@ -139,3 +140,41 @@ def cancel_scan_job(
     db.refresh(scan_job)
 
     return scan_job
+
+@router.get("/scan-jobs/{scan_job_id}/quality-gate")
+def quality_gate(
+    scan_job_id: str,
+    fail_on: str = Query(default="high"),
+    db: Session = Depends(get_db),
+):
+    findings = (
+        db.query(Finding)
+        .filter(Finding.scan_job_id == scan_job_id)
+        .all()
+    )
+
+    counts = {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "info": 0,
+    }
+
+    for f in findings:
+        if f.severity in counts:
+            counts[f.severity] += 1
+
+    # lógica de gate
+    failed = False
+
+    if fail_on == "high" and counts["high"] > 0:
+        failed = True
+
+    if fail_on == "medium" and (counts["high"] > 0 or counts["medium"] > 0):
+        failed = True
+
+    return {
+        "status": "failed" if failed else "passed",
+        "fail_on": fail_on,
+        "counts": counts,
+    }

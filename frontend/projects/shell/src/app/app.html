@@ -1,0 +1,22 @@
+<div class="shell-layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">L2</div>
+      <div>
+        <h1>L2Sec</h1>
+        <span>Local-first PTaaS</span>
+      </div>
+    </div>
+
+    <nav>
+      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/targets" routerLinkActive="active">Targets</a>
+      <a routerLink="/findings" routerLinkActive="active">Findings</a>
+      <a routerLink="/scan-jobs" routerLinkActive="active">Scan Jobs</a>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

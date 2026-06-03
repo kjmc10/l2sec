@@ -1,0 +1,68 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h2>Scan Jobs</h2>
+      <p>Orquesta scans locales ejecutados por el runner.</p>
+    </div>
+
+    <button type="button" (click)="loadData()">Refresh</button>
+  </header>
+
+  <section class="runner-card">
+    <div>
+      <h3>Run Baseline Scan</h3>
+      <p>Selecciona un target registrado y crea un job para el runner local.</p>
+    </div>
+
+    <div class="actions">
+      <select [(ngModel)]="selectedTargetId">
+        <option *ngFor="let target of targets" [value]="target.id">
+          {{ target.name }} - {{ target.url }}
+        </option>
+      </select>
+
+      <button type="button" (click)="runScan()" [disabled]="running">
+        {{ running ? 'Creating...' : 'Run Scan' }}
+      </button>
+    </div>
+  </section>
+
+  <div *ngIf="loading" class="state">Cargando scan jobs...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <div class="table-wrapper" *ngIf="!loading">
+    <table>
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th>Scan Type</th>
+          <th>Upload Mode</th>
+          <th>Target ID</th>
+          <th>Runner ID</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let job of jobs">
+          <td>
+            <span [class]="getStatusClass(job.status)">
+              {{ job.status }}
+            </span>
+          </td>
+          <td>{{ job.scan_type }}</td>
+          <td>{{ job.upload_mode }}</td>
+          <td class="mono">{{ job.target_id }}</td>
+          <td class="mono">{{ job.runner_id || '-' }}</td>
+          <td>{{ job.created_at }}</td>
+        </tr>
+
+        <tr *ngIf="jobs.length === 0">
+          <td colspan="6" class="empty">
+            No hay scan jobs todavía.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

@@ -1,0 +1,59 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h2>Findings</h2>
+      <p>Hallazgos detectados por OWASP ZAP y almacenados en el control plane.</p>
+    </div>
+
+    <div class="filters">
+      <select [(ngModel)]="severity">
+        <option value="">All</option>
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+        <option value="info">Info</option>
+      </select>
+
+      <button type="button" (click)="loadFindings()">Filter</button>
+    </div>
+  </header>
+
+  <div *ngIf="loading" class="state">Cargando findings...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <div class="table-wrapper" *ngIf="!loading">
+    <table>
+      <thead>
+        <tr>
+          <th>Severity</th>
+          <th>Name</th>
+          <th>URL</th>
+          <th>Method</th>
+          <th>CWE</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let finding of findings">
+          <td>
+            <span [class]="getSeverityClass(finding.severity)">
+              {{ finding.severity }}
+            </span>
+          </td>
+          <td>{{ finding.name }}</td>
+          <td class="url">{{ finding.url }}</td>
+          <td>{{ finding.method || '-' }}</td>
+          <td>{{ finding.cwe || '-' }}</td>
+          <td>{{ finding.status }}</td>
+        </tr>
+
+        <tr *ngIf="findings.length === 0">
+          <td colspan="6" class="empty">
+            No hay findings para mostrar.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

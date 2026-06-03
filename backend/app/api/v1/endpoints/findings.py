@@ -25,3 +25,29 @@ def list_findings(
     findings = query.order_by(Finding.created_at.desc()).all()
 
     return findings
+
+@router.get("/findings/summary")
+def findings_summary(
+    scan_job_id: str | None = Query(default=None),
+    db: Session = Depends(get_db),
+):
+    query = db.query(Finding)
+
+    if scan_job_id:
+        query = query.filter(Finding.scan_job_id == scan_job_id)
+
+    findings = query.all()
+
+    summary = {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "info": 0,
+        "total": len(findings),
+    }
+
+    for f in findings:
+        if f.severity in summary:
+            summary[f.severity] += 1
+
+    return summary
