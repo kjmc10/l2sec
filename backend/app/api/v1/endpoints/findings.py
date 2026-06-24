@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import HTTPException, APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
+from app.schemas.finding import FindingStatusUpdate
 from app.db.session import get_db
 from app.models.finding import Finding
 
@@ -8,7 +9,7 @@ from app.models.finding import Finding
 router = APIRouter()
 
 
-@router.get("/findings")
+@router.get("")
 def list_findings(
     severity: str | None = Query(default=None),
     scan_job_id: str | None = Query(default=None),
@@ -26,7 +27,7 @@ def list_findings(
 
     return findings
 
-@router.get("/findings/summary")
+@router.get("/summary")
 def findings_summary(
     scan_job_id: str | None = Query(default=None),
     db: Session = Depends(get_db),
@@ -51,3 +52,25 @@ def findings_summary(
             summary[f.severity] += 1
 
     return summary
+
+@router.patch("/{finding_id}/status")
+def update_finding_status(
+    finding_id: str,
+    payload: FindingStatusUpdate,
+    db: Session = Depends(get_db),
+):
+    finding = db.query(Finding).filter(Finding.id == finding_id).first()
+
+    if not finding:
+        raise HTTPException(status_code=404, detail="Finding not found")
+
+    finding.status = payload.status
+
+    db.commit()
+    db.refresh(finding)
+
+    return {
+        "id": finding.id,
+        "status": finding.status,
+        "severity": finding.severity,
+    }

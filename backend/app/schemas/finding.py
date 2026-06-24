@@ -2,6 +2,7 @@ from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel
+from typing import Literal
 
 
 class FindingResponse(BaseModel):
@@ -22,3 +23,13 @@ class FindingResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+FindingStatus = Literal[
+    "open",
+    "false_positive",
+    "accepted_risk",
+    "fixed",
+]
+
+class FindingStatusUpdate(BaseModel):
+    status: FindingStatus

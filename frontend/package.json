@@ -11,7 +11,8 @@
     "serve:ssr:nf-dashboard": "node dist/nf-dashboard/server/server.mjs",
     "serve:ssr:nf-findings": "node dist/nf-findings/server/server.mjs",
     "serve:ssr:nf-scan-jobs": "node dist/nf-scan-jobs/server/server.mjs",
-    "serve:ssr:nf-targets": "node dist/nf-targets/server/server.mjs"
+    "serve:ssr:nf-targets": "node dist/nf-targets/server/server.mjs",
+    "serve:ssr:nf-runners": "node dist/nf-runners/server/server.mjs"
   },
   "prettier": {
     "printWidth": 100,

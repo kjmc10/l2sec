@@ -21,6 +21,14 @@ export const routes: Routes = [
       }).then((m) => m.routes),
   },
   {
+    path: 'runners',
+    loadChildren: () =>
+      loadRemoteModule({
+        remoteName: 'nf-runners',
+        exposedModule: './routes',
+      }).then((m) => m.routes),
+  },
+  {
     path: 'findings',
     loadChildren: () =>
       loadRemoteModule('nf-findings', './routes').then((m) => m.routes),

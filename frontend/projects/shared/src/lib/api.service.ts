@@ -53,13 +53,57 @@ export interface TargetCreatePayload {
   environment: string;
 }
 
+export interface Runner {
+  id: string;
+  name: string;
+  is_online: boolean;
+  last_seen_at?: string | null;
+  created_at: string;
+}
+
+export interface RunnerCreated {
+  id: string;
+  name: string;
+  token: string;
+  is_online: boolean;
+  created_at: string;
+}
+
+export interface RunnerRotateTokenResponse {
+  id: string;
+  name: string;
+  token: string;
+  is_online: boolean;
+  last_seen_at?: string | null;
+  created_at: string;
+}
+
+export interface RunnerCreatePayload {
+  name: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
   private readonly baseUrl = 'http://localhost:8000/v1';
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient) { }
+
+  getRunners() {
+    return this.http.get<Runner[]>(`${this.baseUrl}/runners`);
+  }
+
+  createRunner(payload: RunnerCreatePayload) {
+    return this.http.post<RunnerCreated>(`${this.baseUrl}/runners`, payload);
+  }
+
+  rotateRunnerToken(runnerId: string) {
+    return this.http.post<RunnerRotateTokenResponse>(
+      `${this.baseUrl}/runners/${runnerId}/rotate-token`,
+      {}
+    );
+  }
 
   getFindings(severity?: string) {
     let params = new HttpParams();
@@ -102,7 +146,7 @@ export class ApiService {
   }
 
   createTarget(payload: TargetCreatePayload) {
-      return this.http.post<Target>(`${this.baseUrl}/targets`, payload);
+    return this.http.post<Target>(`${this.baseUrl}/targets`, payload);
   }
 
 }

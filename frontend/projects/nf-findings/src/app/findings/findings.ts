@@ -1,13 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
+import { SeverityBadgeComponent, StatusBadgeComponent } from 'shared';
 import { ApiService, Finding } from 'shared';
 
 @Component({
   selector: 'app-findings',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    SeverityBadgeComponent,
+    StatusBadgeComponent,
+  ],
   templateUrl: './findings.html',
   styleUrl: './findings.scss',
 })
@@ -26,6 +31,9 @@ export class FindingsComponent implements OnInit {
   // drawer
   selected?: Finding;
   updating = false;
+
+  // ✅ BULK
+  selectedIds = new Set<string>();
 
   constructor(private readonly api: ApiService) {}
 
@@ -64,6 +72,16 @@ export class FindingsComponent implements OnInit {
 
       return matchesSeverity && matchesStatus && matchesSearch;
     });
+
+    this.sortBySeverity(); // ✅ orden automático
+  }
+
+  sortBySeverity() {
+    const order = ['high', 'medium', 'low', 'info'];
+
+    this.filtered.sort(
+      (a, b) => order.indexOf(a.severity) - order.indexOf(b.severity)
+    );
   }
 
   openDetail(f: Finding) {
@@ -83,8 +101,7 @@ export class FindingsComponent implements OnInit {
       next: (updated) => {
         this.selected = updated;
 
-        // actualizar lista local
-        const index = this.findings.findIndex(f => f.id === updated.id);
+        const index = this.findings.findIndex((f) => f.id === updated.id);
         if (index !== -1) this.findings[index] = updated;
 
         this.applyFilters();
@@ -94,5 +111,29 @@ export class FindingsComponent implements OnInit {
         this.updating = false;
       },
     });
+  }
+
+  // ✅ BULK
+  toggleSelect(id: string) {
+    if (this.selectedIds.has(id)) {
+      this.selectedIds.delete(id);
+    } else {
+      this.selectedIds.add(id);
+    }
+  }
+
+  bulkUpdate(status: string) {
+    const ids = Array.from(this.selectedIds);
+
+    ids.forEach((id) => {
+      this.api.updateFindingStatus(id, status).subscribe();
+    });
+
+    this.selectedIds.clear();
+    this.loadFindings();
+  }
+
+  isSelected(id: string) {
+    return this.selectedIds.has(id);
   }
 }

@@ -13,7 +13,11 @@
     "experimentalDecorators": true,
     "paths": {
       "shared": [
-        "./dist/shared"
+        "./dist/shared",
+        "./projects/shared/src/public-api.ts"
+      ],
+      "shared/*": [
+          "./projects/shared/src/*"
       ]
     },
     "importHelpers": true,
@@ -70,6 +74,12 @@
     },
     {
       "path": "./projects/nf-targets/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/nf-runners/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/nf-runners/tsconfig.spec.json"
     }
   ]
 }

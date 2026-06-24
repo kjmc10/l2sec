@@ -66,3 +66,32 @@ tr:hover {
   background: #2563eb;
   color: white;
 }
+
+.selected {
+  background: #eef2ff;
+}
+
+/* bulk */
+.bulk-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: #f1f5f9;
+  padding: 10px;
+  border-radius: 12px;
+}
+
+/* drawer */
+.drawer {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(0,0,0,0.4);
+}
+
+.drawer-content {
+  width: 420px;
+  background: white;
+  padding: 20px;
+}

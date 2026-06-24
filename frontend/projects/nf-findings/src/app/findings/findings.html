@@ -4,6 +4,23 @@
     <h2>Findings</h2>
   </header>
 
+  <!-- 🔥 BULK ACTIONS -->
+  <div class="bulk-actions" *ngIf="selectedIds.size > 0">
+    <span>{{ selectedIds.size }} selected</span>
+
+    <button (click)="bulkUpdate('false_positive')">
+      False Positive
+    </button>
+
+    <button (click)="bulkUpdate('accepted_risk')">
+      Accept Risk
+    </button>
+
+    <button (click)="bulkUpdate('fixed')">
+      Fixed
+    </button>
+  </div>
+
   <!-- filtros -->
   <div class="filters">
     <input
@@ -36,23 +53,45 @@
   <table *ngIf="!loading">
     <thead>
       <tr>
+        <th></th> <!-- checkbox -->
         <th>Name</th>
         <th>Severity</th>
         <th>Status</th>
         <th>URL</th>
       </tr>
     </thead>
+
     <tbody>
-      <tr *ngFor="let f of filtered" (click)="openDetail(f)">
+      <tr
+        *ngFor="let f of filtered"
+        (click)="openDetail(f)"
+        [class.selected]="selected?.id === f.id"
+      >
+        <td>
+          <input
+            type="checkbox"
+            (click)="$event.stopPropagation()"
+            (change)="toggleSelect(f.id)"
+            [checked]="isSelected(f.id)"
+          />
+        </td>
+
         <td>{{ f.name }}</td>
-        <td>{{ f.severity }}</td>
-        <td>{{ f.status }}</td>
+
+        <td>
+          <shared-severity-badge [severity]="f.severity"></shared-severity-badge>
+        </td>
+
+        <td>
+          <shared-status-badge [status]="f.status"></shared-status-badge>
+        </td>
+
         <td>{{ f.url }}</td>
       </tr>
     </tbody>
   </table>
 
-  <!-- drawer -->
+  <!-- DRAWER -->
   <div class="drawer" *ngIf="selected">
     <div class="drawer-content">
 
@@ -60,8 +99,9 @@
 
       <h3>{{ selected.name }}</h3>
 
-      <p><strong>Severity:</strong> {{ selected.severity }}</p>
-      <p><strong>Status:</strong> {{ selected.status }}</p>
+      <shared-severity-badge [severity]="selected.severity"></shared-severity-badge>
+      <shared-status-badge [status]="selected.status"></shared-status-badge>
+
       <p><strong>URL:</strong> {{ selected.url }}</p>
       <p><strong>Method:</strong> {{ selected.method }}</p>
       <p><strong>CWE:</strong> {{ selected.cwe }}</p>

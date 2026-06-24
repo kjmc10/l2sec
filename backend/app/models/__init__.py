@@ -1,4 +1,6 @@
-from app.models.target import Target
-from app.models.runner import Runner
-from app.models.scan_job import ScanJob
-from app.models.finding import Finding
+from app.db.base import Base
+
+from .target import Target
+from .finding import Finding
+from .scan_job import ScanJob
+from .runner import Runner
