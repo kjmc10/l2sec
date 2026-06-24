@@ -5,6 +5,9 @@ from fastapi import FastAPI
 from app.api.v1.router import api_router
 from app.core.config import settings
 from fastapi.middleware.cors import CORSMiddleware
+from app.db.session import engine
+from app.models import Base
+import app.models
 
 
 logging.basicConfig(level=logging.INFO)
@@ -27,6 +30,7 @@ app.add_middleware(
         "http://localhost:4202",
         "http://localhost:4203",
         "http://localhost:4204",
+        "http://localhost:4205",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -45,6 +49,7 @@ def on_startup():
     logger.info("L2Sec API started")
     logger.info("Environment: %s", settings.app_env)
     logger.info("API prefix: %s", settings.api_v1_prefix)
+    Base.metadata.create_all(bind=engine)
 
 
 @app.get("/")

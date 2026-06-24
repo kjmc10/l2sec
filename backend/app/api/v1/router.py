@@ -21,6 +21,7 @@ api_router.include_router(
 
 api_router.include_router(
     runners.router,
+    prefix="/runners",
     tags=["runners"],
 )
 
@@ -35,5 +36,6 @@ api_router.include_router(
 )
 api_router.include_router(
     findings.router, 
+    prefix="/findings",
     tags=["findings"]
 )

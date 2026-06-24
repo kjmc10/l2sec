@@ -2,5 +2,6 @@
   "nf-dashboard": "http://localhost:4201/remoteEntry.json",
   "nf-findings": "http://localhost:4202/remoteEntry.json",
   "nf-scan-jobs": "http://localhost:4203/remoteEntry.json",
-  "nf-targets": "http://localhost:4204/remoteEntry.json"
+  "nf-targets": "http://localhost:4204/remoteEntry.json",
+  "nf-runners": "http://localhost:4205/remoteEntry.json"
 }

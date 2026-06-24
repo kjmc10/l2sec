@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, HTTPException, status
 from sqlalchemy.orm import Session
@@ -11,6 +12,7 @@ from app.schemas.runner import (
     RunnerCreatedResponse,
     RunnerHeartbeatResponse,
     RunnerResponse,
+    RunnerRotateTokenResponse,
 )
 from app.services.runner_auth import get_runner_from_authorization
 
@@ -19,7 +21,7 @@ router = APIRouter()
 
 
 @router.post(
-    "/runners",
+    "",
     response_model=RunnerCreatedResponse,
     status_code=status.HTTP_201_CREATED,
 )
@@ -50,7 +52,7 @@ def create_runner(
 
 
 @router.get(
-    "/runners",
+    "",
     response_model=list[RunnerResponse],
 )
 def list_runners(
@@ -62,7 +64,7 @@ def list_runners(
 
 
 @router.post(
-    "/runners/heartbeat",
+    "/heartbeat",
     response_model=RunnerHeartbeatResponse,
 )
 def runner_heartbeat(
@@ -88,4 +90,36 @@ def runner_heartbeat(
         "runner_name": runner.name,
         "is_online": runner.is_online,
         "last_seen_at": runner.last_seen_at,
+    }
+
+
+@router.post(
+    "/{runner_id}/rotate-token",
+    response_model=RunnerRotateTokenResponse,
+)
+def rotate_runner_token(
+    runner_id: UUID,
+    db: Session = Depends(get_db),
+):
+    runner = db.query(Runner).filter(Runner.id == runner_id).first()
+
+    if not runner:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Runner not found.",
+        )
+
+    token = generate_runner_token()
+    runner.token_hash = hash_token(token)
+
+    db.commit()
+    db.refresh(runner)
+
+    return {
+        "id": runner.id,
+        "name": runner.name,
+        "token": token,
+        "is_online": runner.is_online,
+        "last_seen_at": runner.last_seen_at,
+        "created_at": runner.created_at,
     }

@@ -1,0 +1,184 @@
+.page {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.page-header h2 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.page-header p {
+    margin: 6px 0 0;
+    color: #64748b;
+}
+
+button {
+    border: 0;
+    background: #2563eb;
+    color: #ffffff;
+    padding: 10px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+button:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
+
+.create-card,
+.secret-card,
+.runner-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.create-card {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+}
+
+.create-card h3,
+.secret-card h3,
+.runner-card h3 {
+    margin: 0;
+}
+
+.create-card p,
+.secret-card p,
+.runner-card p {
+    margin: 6px 0 0;
+    color: #64748b;
+}
+
+.create-form {
+    display: flex;
+    gap: 8px;
+}
+
+input {
+    min-width: 320px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+}
+
+.secret-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.secret-input {
+    margin-top: 16px;
+    display: flex;
+    gap: 8px;
+}
+
+.secret-input input {
+    flex: 1;
+    font-family: monospace;
+}
+
+.command-block {
+    margin-top: 18px;
+}
+
+.command-block pre {
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 16px;
+    border-radius: 14px;
+    overflow-x: auto;
+    font-size: 13px;
+}
+
+.runners-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 16px;
+}
+
+.runner-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.runner-top p {
+    word-break: break-all;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+.status {
+    display: inline-flex;
+    height: 26px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.status.online {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status.offline {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.runner-meta {
+    margin-top: 18px;
+    display: grid;
+    gap: 10px;
+}
+
+.runner-meta span {
+    display: block;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.runner-meta strong {
+    font-size: 13px;
+    color: #0f172a;
+    word-break: break-all;
+}
+
+.runner-actions {
+    margin-top: 18px;
+}
+
+.error {
+    color: #991b1b;
+    background: #fee2e2;
+    padding: 12px;
+    border-radius: 12px;
+}
+
+.success {
+    color: #166534;
+    background: #dcfce7;
+    padding: 12px;
+    border-radius: 12px;
+}
+
+.state,
+.empty {
+    color: #64748b;
+}

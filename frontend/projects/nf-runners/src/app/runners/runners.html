@@ -1,0 +1,103 @@
+<section class="page">
+    <header class="page-header">
+        <div>
+            <h2>Runners</h2>
+            <p>Administra runners locales y genera client secrets para conectarlos al control plane.</p>
+        </div>
+
+        <button type="button" (click)="loadRunners()">
+            Refresh
+        </button>
+    </header>
+
+    <section class="create-card">
+        <div>
+            <h3>Create Runner</h3>
+            <p>El client secret solo se muestra al crear o rotar el token.</p>
+        </div>
+
+        <div class="create-form">
+            <input type="text" [(ngModel)]="runnerName" placeholder="local-runner-01" />
+
+            <button type="button" (click)="createRunner()" [disabled]="creating">
+                {{ creating ? 'Creating...' : 'Create Runner' }}
+            </button>
+        </div>
+    </section>
+
+    <div *ngIf="error" class="error">
+        {{ error }}
+    </div>
+
+    <div *ngIf="success" class="success">
+        {{ success }}
+    </div>
+
+    <section class="secret-card" *ngIf="latestSecret">
+        <div class="secret-header">
+            <div>
+                <h3>Client Secret</h3>
+                <p>Usa este valor como <code>RUNNER_TOKEN</code>. No se podrá volver a ver después.</p>
+            </div>
+
+            <button type="button" (click)="toggleReveal()">
+                {{ revealSecret ? 'Hide' : 'Show' }}
+            </button>
+        </div>
+
+        <div class="secret-input">
+            <input [type]="revealSecret ? 'text' : 'password'" [value]="latestSecret.token" readonly />
+
+            <button type="button" (click)="copySecret()">
+                Copy
+            </button>
+        </div>
+
+        <div class="command-block">
+            <h4>Run local runner</h4>
+
+            <pre>{{ getRunnerCommand() }}</pre>
+        </div>
+    </section>
+
+    <div *ngIf="loading" class="state">
+        Cargando runners...
+    </div>
+
+    <section class="runners-grid" *ngIf="!loading">
+        <article class="runner-card" *ngFor="let runner of runners">
+            <div class="runner-top">
+                <div>
+                    <h3>{{ runner.name }}</h3>
+                    <p>{{ runner.id }}</p>
+                </div>
+
+                <span class="status" [class.online]="runner.is_online" [class.offline]="!runner.is_online">
+                    {{ runner.is_online ? 'ONLINE' : 'OFFLINE' }}
+                </span>
+            </div>
+
+            <div class="runner-meta">
+                <div>
+                    <span>Last Seen</span>
+                    <strong>{{ runner.last_seen_at || '-' }}</strong>
+                </div>
+
+                <div>
+                    <span>Created</span>
+                    <strong>{{ runner.created_at }}</strong>
+                </div>
+            </div>
+
+            <div class="runner-actions">
+                <button type="button" (click)="rotateToken(runner)" [disabled]="rotatingId === runner.id">
+                    {{ rotatingId === runner.id ? 'Rotating...' : 'Rotate Secret' }}
+                </button>
+            </div>
+        </article>
+
+        <div class="empty" *ngIf="runners.length === 0">
+            No hay runners registrados.
+        </div>
+    </section>
+</section>

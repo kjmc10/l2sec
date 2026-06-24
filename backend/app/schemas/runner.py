@@ -33,3 +33,12 @@ class RunnerHeartbeatResponse(BaseModel):
     runner_name: str
     is_online: bool
     last_seen_at: datetime
+
+
+class RunnerRotateTokenResponse(BaseModel):
+    id: UUID
+    name: str
+    token: str
+    is_online: bool
+    last_seen_at: datetime | None
+    created_at: datetime

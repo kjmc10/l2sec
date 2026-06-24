@@ -1,49 +1,18 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.page-header h2 {
-  margin: 0;
-  font-size: 28px;
-}
-
-.page-header p {
-  margin: 6px 0 0;
-  color: #64748b;
+  gap: 16px;
 }
 
 .filters {
   display: flex;
-  gap: 8px;
+  gap: 12px;
 }
 
-select,
-button {
-  padding: 10px 12px;
-  border-radius: 12px;
+input, select {
+  padding: 8px;
+  border-radius: 8px;
   border: 1px solid #cbd5e1;
-}
-
-button {
-  background: #2563eb;
-  color: #ffffff;
-  border: 0;
-  cursor: pointer;
-}
-
-.table-wrapper {
-  background: #ffffff;
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
 }
 
 table {
@@ -51,60 +20,78 @@ table {
   border-collapse: collapse;
 }
 
-th {
-  text-align: left;
+td, th {
+  padding: 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+tr {
+  cursor: pointer;
+}
+
+tr:hover {
   background: #f8fafc;
-  color: #475569;
-  font-size: 13px;
-  padding: 14px;
 }
 
-td {
-  padding: 14px;
-  border-top: 1px solid #e2e8f0;
-  font-size: 14px;
+/* drawer */
+.drawer {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: flex-end;
 }
 
-.url {
-  max-width: 420px;
-  word-break: break-all;
-  color: #334155;
+.drawer-content {
+  width: 420px;
+  background: white;
+  padding: 20px;
+  overflow-y: auto;
 }
 
-.severity {
-  display: inline-flex;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
+.close {
+  float: right;
 }
 
-.severity.high {
-  color: #991b1b;
-  background: #fee2e2;
+.actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 8px;
 }
 
-.severity.medium {
-  color: #92400e;
-  background: #fef3c7;
+.actions button {
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
 }
 
-.severity.low {
-  color: #1d4ed8;
-  background: #dbeafe;
+.selected {
+  background: #eef2ff;
 }
 
-.severity.info {
-  color: #475569;
-  background: #e2e8f0;
+/* bulk */
+.bulk-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: #f1f5f9;
+  padding: 10px;
+  border-radius: 12px;
 }
 
-.empty,
-.state {
-  color: #64748b;
+/* drawer */
+.drawer {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(0,0,0,0.4);
 }
 
-.error {
-  color: #dc2626;
+.drawer-content {
+  width: 420px;
+  background: white;
+  padding: 20px;
 }
