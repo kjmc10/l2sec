@@ -1,31 +1,24 @@
 <section class="page">
 
   <header class="header">
-    <h2>Findings</h2>
+    <div>
+      <h2>Findings</h2>
+      <p>Gestiona hallazgos detectados por el runner local y OWASP ZAP.</p>
+    </div>
+
+    <button type="button" class="refresh-button" (click)="loadFindings()">
+      Refresh
+    </button>
   </header>
 
-  <!-- 🔥 BULK ACTIONS -->
-  <div class="bulk-actions" *ngIf="selectedIds.size > 0">
-    <span>{{ selectedIds.size }} selected</span>
-
-    <button (click)="bulkUpdate('false_positive')">
-      False Positive
-    </button>
-
-    <button (click)="bulkUpdate('accepted_risk')">
-      Accept Risk
-    </button>
-
-    <button (click)="bulkUpdate('fixed')">
-      Fixed
-    </button>
+  <div class="toast" *ngIf="toastMessage" [class.success]="toastType === 'success'" [class.error]="toastType === 'error'">
+    {{ toastMessage }}
   </div>
 
-  <!-- filtros -->
   <div class="filters">
     <input
       type="text"
-      placeholder="Search..."
+      placeholder="Search by name or URL..."
       [(ngModel)]="search"
       (input)="applyFilters()"
     />
@@ -45,75 +38,137 @@
       <option value="accepted_risk">Accepted Risk</option>
       <option value="fixed">Fixed</option>
     </select>
+
+    <button type="button" class="secondary-button" (click)="clearFilters()">
+      Clear Filters
+    </button>
   </div>
 
-  <!-- tabla -->
-  <div *ngIf="loading">Loading...</div>
+  <div class="bulk-actions" *ngIf="selectedIds.size > 0">
+    <strong>{{ selectedIds.size }} selected</strong>
 
-  <table *ngIf="!loading">
-    <thead>
-      <tr>
-        <th></th> <!-- checkbox -->
-        <th>Name</th>
-        <th>Severity</th>
-        <th>Status</th>
-        <th>URL</th>
-      </tr>
-    </thead>
+    <button type="button" (click)="bulkUpdate('false_positive')" [disabled]="updating">
+      False Positive
+    </button>
 
-    <tbody>
-      <tr
-        *ngFor="let f of filtered"
-        (click)="openDetail(f)"
-        [class.selected]="selected?.id === f.id"
-      >
-        <td>
-          <input
-            type="checkbox"
-            (click)="$event.stopPropagation()"
-            (change)="toggleSelect(f.id)"
-            [checked]="isSelected(f.id)"
-          />
-        </td>
+    <button type="button" (click)="bulkUpdate('accepted_risk')" [disabled]="updating">
+      Accept Risk
+    </button>
 
-        <td>{{ f.name }}</td>
+    <button type="button" (click)="bulkUpdate('fixed')" [disabled]="updating">
+      Mark Fixed
+    </button>
 
-        <td>
-          <shared-severity-badge [severity]="f.severity"></shared-severity-badge>
-        </td>
+    <button type="button" class="secondary-button" (click)="clearSelection()" [disabled]="updating">
+      Clear Selection
+    </button>
+  </div>
 
-        <td>
-          <shared-status-badge [status]="f.status"></shared-status-badge>
-        </td>
+  <div *ngIf="loading" class="state">
+    Loading findings...
+  </div>
 
-        <td>{{ f.url }}</td>
-      </tr>
-    </tbody>
-  </table>
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
 
-  <!-- DRAWER -->
+  <div class="table-wrapper" *ngIf="!loading">
+    <table>
+      <thead>
+        <tr>
+          <th>
+            <input
+              type="checkbox"
+              [checked]="allFilteredSelected()"
+              (change)="toggleSelectAllFiltered()"
+            />
+          </th>
+          <th>Name</th>
+          <th>Severity</th>
+          <th>Status</th>
+          <th>URL</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr
+          *ngFor="let f of filtered"
+          [class]="getRowClass(f)"
+          [class.selected]="selected?.id === f.id"
+          (click)="openDetail(f)"
+        >
+          <td>
+            <input
+              type="checkbox"
+              (click)="$event.stopPropagation()"
+              (change)="toggleSelect(f.id)"
+              [checked]="isSelected(f.id)"
+            />
+          </td>
+
+          <td class="finding-name">
+            {{ f.name }}
+          </td>
+
+          <td>
+            <shared-severity-badge [severity]="f.severity"></shared-severity-badge>
+          </td>
+
+          <td>
+            <shared-status-badge [status]="f.status"></shared-status-badge>
+          </td>
+
+          <td class="url-cell">
+            {{ f.url }}
+          </td>
+        </tr>
+
+        <tr *ngIf="filtered.length === 0">
+          <td colspan="5" class="empty">
+            No findings match the current filters.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
   <div class="drawer" *ngIf="selected">
     <div class="drawer-content">
 
       <button class="close" (click)="closeDetail()">✕</button>
 
-      <h3>{{ selected.name }}</h3>
+      <div class="drawer-header">
+        <h3>{{ selected.name }}</h3>
 
-      <shared-severity-badge [severity]="selected.severity"></shared-severity-badge>
-      <shared-status-badge [status]="selected.status"></shared-status-badge>
+        <div class="drawer-badges">
+          <shared-severity-badge [severity]="selected.severity"></shared-severity-badge>
+          <shared-status-badge [status]="selected.status"></shared-status-badge>
+        </div>
+      </div>
 
-      <p><strong>URL:</strong> {{ selected.url }}</p>
-      <p><strong>Method:</strong> {{ selected.method }}</p>
-      <p><strong>CWE:</strong> {{ selected.cwe }}</p>
+      <div class="detail-row">
+        <strong>URL:</strong>
+        <span>{{ selected.url || '-' }}</span>
+      </div>
+
+      <div class="detail-row">
+        <strong>Method:</strong>
+        <span>{{ selected.method || '-' }}</span>
+      </div>
+
+      <div class="detail-row">
+        <strong>CWE:</strong>
+        <span>{{ selected.cwe || '-' }}</span>
+      </div>
 
       <div class="evidence">
         <h4>Evidence</h4>
-        <pre>{{ selected.evidence }}</pre>
+        <pre>{{ selected.evidence || '-' }}</pre>
       </div>
 
       <div class="remediation">
         <h4>Remediation</h4>
-        <p>{{ selected.remediation }}</p>
+        <p>{{ selected.remediation || '-' }}</p>
       </div>
 
       <div class="actions">
@@ -129,6 +184,7 @@
           Mark Fixed
         </button>
       </div>
+
     </div>
   </div>
 
