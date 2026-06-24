@@ -35,7 +35,7 @@ export class FindingsComponent implements OnInit {
   // ✅ BULK
   selectedIds = new Set<string>();
 
-  constructor(private readonly api: ApiService) {}
+  constructor(private readonly api: ApiService) { }
 
   ngOnInit(): void {
     this.loadFindings();
@@ -99,10 +99,22 @@ export class FindingsComponent implements OnInit {
 
     this.api.updateFindingStatus(this.selected.id, status).subscribe({
       next: (updated) => {
-        this.selected = updated;
+        // ✅ actualizar drawer sin perder datos
+        if (this.selected && this.selected.id === updated.id) {
+          this.selected = {
+            ...this.selected,
+            status: updated.status,
+          };
+        }
 
-        const index = this.findings.findIndex((f) => f.id === updated.id);
-        if (index !== -1) this.findings[index] = updated;
+        // ✅ actualizar lista sin romper datos
+        const index = this.findings.findIndex(f => f.id === updated.id);
+        if (index !== -1) {
+          this.findings[index] = {
+            ...this.findings[index],
+            status: updated.status,
+          };
+        }
 
         this.applyFilters();
         this.updating = false;
@@ -112,6 +124,7 @@ export class FindingsComponent implements OnInit {
       },
     });
   }
+
 
   // ✅ BULK
   toggleSelect(id: string) {
