@@ -1,40 +1,190 @@
-<section class="page">
-  <header class="page-header">
+<section class="dashboard-page">
+
+  <header class="dashboard-header">
     <div>
       <h2>Security Dashboard</h2>
-      <p>Resumen de riesgos detectados por el runner local y OWASP ZAP.</p>
+      <p>Resumen ejecutivo del posture de seguridad local-first.</p>
     </div>
 
-    <button type="button" (click)="loadSummary()">Refresh</button>
+    <button type="button" (click)="loadDashboard()">
+      Refresh
+    </button>
   </header>
 
-  <div *ngIf="loading" class="state">Cargando resumen...</div>
-  <div *ngIf="error" class="error">{{ error }}</div>
-
-  <div *ngIf="summary" class="cards">
-    <article class="card high">
-      <span>High</span>
-      <strong>{{ summary.high }}</strong>
-    </article>
-
-    <article class="card medium">
-      <span>Medium</span>
-      <strong>{{ summary.medium }}</strong>
-    </article>
-
-    <article class="card low">
-      <span>Low</span>
-      <strong>{{ summary.low }}</strong>
-    </article>
-
-    <article class="card info">
-      <span>Info</span>
-      <strong>{{ summary.info }}</strong>
-    </article>
-
-    <article class="card total">
-      <span>Total</span>
-      <strong>{{ summary.total }}</strong>
-    </article>
+  <div *ngIf="loading" class="state">
+    Cargando dashboard...
   </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <ng-container *ngIf="summary && !loading">
+
+    <!-- TOP CARDS -->
+    <section class="top-grid">
+      <article class="score-card">
+        <div>
+          <span>Security Score</span>
+          <strong [class]="getScoreClass()">
+            {{ summary.security_score }}
+          </strong>
+        </div>
+
+        <p>
+          Score calculado según findings abiertos y severidad.
+        </p>
+      </article>
+
+      <article class="metric-card">
+        <span>Quality Gate</span>
+        <strong [class]="getQualityGateClass()">
+          {{ summary.quality_gate }}
+        </strong>
+        <p>Política actual: fail_on high.</p>
+      </article>
+
+      <article class="metric-card">
+        <span>Runners Online</span>
+        <strong>
+          {{ summary.runners.online }} / {{ summary.runners.total }}
+        </strong>
+        <p>Runners locales conectados al control plane.</p>
+      </article>
+
+      <article class="metric-card">
+        <span>Targets</span>
+        <strong>{{ summary.targets.total }}</strong>
+        <p>Aplicaciones y APIs registradas.</p>
+      </article>
+    </section>
+
+    <!-- FINDINGS BY SEVERITY -->
+    <section class="section-grid">
+      <article class="panel">
+        <header>
+          <h3>Findings by Severity</h3>
+          <p>Distribución de hallazgos por riesgo.</p>
+        </header>
+
+        <div class="severity-grid">
+          <div class="severity-box high">
+            <span>High</span>
+            <strong>{{ summary.findings.severity.high }}</strong>
+          </div>
+
+          <div class="severity-box medium">
+            <span>Medium</span>
+            <strong>{{ summary.findings.severity.medium }}</strong>
+          </div>
+
+          <div class="severity-box low">
+            <span>Low</span>
+            <strong>{{ summary.findings.severity.low }}</strong>
+          </div>
+
+          <div class="severity-box info">
+            <span>Info</span>
+            <strong>{{ summary.findings.severity.info }}</strong>
+          </div>
+        </div>
+
+        <div class="total-findings">
+          Total findings: <strong>{{ summary.findings.severity.total }}</strong>
+        </div>
+      </article>
+
+      <article class="panel">
+        <header>
+          <h3>Finding Lifecycle</h3>
+          <p>Estado operativo de los hallazgos.</p>
+        </header>
+
+        <div class="lifecycle-list">
+          <div>
+            <span>Open</span>
+            <strong>{{ summary.findings.status.open }}</strong>
+          </div>
+
+          <div>
+            <span>False Positive</span>
+            <strong>{{ summary.findings.status.false_positive }}</strong>
+          </div>
+
+          <div>
+            <span>Accepted Risk</span>
+            <strong>{{ summary.findings.status.accepted_risk }}</strong>
+          </div>
+
+          <div>
+            <span>Fixed</span>
+            <strong>{{ summary.findings.status.fixed }}</strong>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- SCAN JOBS -->
+    <section class="section-grid">
+      <article class="panel">
+        <header>
+          <h3>Scan Jobs</h3>
+          <p>Estado general de las ejecuciones recientes.</p>
+        </header>
+
+        <div class="job-stats">
+          <div>
+            <span>Total</span>
+            <strong>{{ summary.scan_jobs.summary.total }}</strong>
+          </div>
+
+          <div>
+            <span>Queued</span>
+            <strong>{{ summary.scan_jobs.summary.queued }}</strong>
+          </div>
+
+          <div>
+            <span>Running</span>
+            <strong>{{ summary.scan_jobs.summary.running }}</strong>
+          </div>
+
+          <div>
+            <span>Completed</span>
+            <strong>{{ summary.scan_jobs.summary.completed }}</strong>
+          </div>
+
+          <div>
+            <span>Failed</span>
+            <strong>{{ summary.scan_jobs.summary.failed }}</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <header>
+          <h3>Latest Scans</h3>
+          <p>Últimos scan jobs creados.</p>
+        </header>
+
+        <div class="latest-scans" *ngIf="summary.scan_jobs.latest.length > 0">
+          <div class="scan-row" *ngFor="let scan of summary.scan_jobs.latest">
+            <div>
+              <strong>{{ scan.scan_type }}</strong>
+              <span>{{ scan.id }}</span>
+            </div>
+
+            <span [class]="getScanStatusClass(scan.status)">
+              {{ scan.status }}
+            </span>
+          </div>
+        </div>
+
+        <div class="empty" *ngIf="summary.scan_jobs.latest.length === 0">
+          No hay scans todavía.
+        </div>
+      </article>
+    </section>
+
+  </ng-container>
+
 </section>

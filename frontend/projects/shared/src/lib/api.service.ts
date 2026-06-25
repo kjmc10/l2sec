@@ -1,6 +1,58 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
+export interface DashboardSeveritySummary {
+  high: number;
+  medium: number;
+  low: number;
+  info: number;
+  total: number;
+}
+
+export interface DashboardStatusSummary {
+  open: number;
+  false_positive: number;
+  accepted_risk: number;
+  fixed: number;
+}
+
+export interface DashboardLatestScan {
+  id: string;
+  target_id: string;
+  runner_id?: string | null;
+  scan_type: string;
+  status: string;
+  upload_mode: string;
+  created_at: string;
+  started_at?: string | null;
+  finished_at?: string | null;
+}
+
+export interface DashboardSummary {
+  security_score: number;
+  quality_gate: string;
+  findings: {
+    severity: DashboardSeveritySummary;
+    status: DashboardStatusSummary;
+  };
+  scan_jobs: {
+    summary: {
+      total: number;
+      queued: number;
+      running: number;
+      completed: number;
+      failed: number;
+    };
+    latest: DashboardLatestScan[];
+  };
+  runners: {
+    online: number;
+    total: number;
+  };
+  targets: {
+    total: number;
+  };
+}
 export interface Finding {
   id: string;
   scan_job_id: string;
@@ -90,6 +142,10 @@ export class ApiService {
 
   constructor(private readonly http: HttpClient) { }
 
+  getDashboardSummary() {
+    return this.http.get<DashboardSummary>(`${this.baseUrl}/dashboard/summary`);
+  }
+  
   getRunners() {
     return this.http.get<Runner[]>(`${this.baseUrl}/runners`);
   }

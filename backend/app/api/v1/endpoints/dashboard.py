@@ -170,14 +170,20 @@ def dashboard_summary(db: Session = Depends(get_db)):
         high=actionable_severity_counts["high"],
     )
 
-    scan_job_status_counts = {
-        "total": db.query(ScanJob).count(),
-        "queued": db.query(ScanJob).filter(ScanJob.status == "queued").count(),
-        "picked": db.query(ScanJob).filter(ScanJob.status == "picked").count(),
-        "running": db.query(ScanJob).filter(ScanJob.status == "running").count(),
-        "completed": db.query(ScanJob).filter(ScanJob.status == "completed").count(),
-        "failed": db.query(ScanJob).filter(ScanJob.status == "failed").count(),
-        "canceled": db.query(ScanJob).filter(ScanJob.status == "canceled").count(),
+    total_jobs = db.query(ScanJob).count()
+
+    queued_jobs = db.query(ScanJob).filter(ScanJob.status == "queued").count()
+    running_jobs = db.query(ScanJob).filter(ScanJob.status == "running").count()
+    completed_jobs = db.query(ScanJob).filter(ScanJob.status == "completed").count()
+    failed_jobs = db.query(ScanJob).filter(ScanJob.status == "failed").count()
+    picked_jobs = db.query(ScanJob).filter(ScanJob.status == "picked").count()
+
+    scan_job_summary = {
+        "total": total_jobs,
+        "queued": queued_jobs,
+        "running": running_jobs + picked_jobs,  # 🔥 clave
+        "completed": completed_jobs,
+        "failed": failed_jobs,
     }
 
     latest_scan_jobs = (
@@ -256,8 +262,8 @@ def dashboard_summary(db: Session = Depends(get_db)):
             "open": finding_status_counts["open"],
         },
         "scan_jobs": {
-            "summary": scan_job_status_counts,
-            "latest": latest_scans,
+        "summary": scan_job_summary,
+        "latest": latest_scans,
         },
         "runners": {
             "online": runners_online,
